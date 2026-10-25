@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="A visual workspace for explainable fuzzy learning. Bring your dataset, run real exFuzzy experiments, and explore the rules behind your results.">
+  <meta name="theme-color" content="#173f35">
+  <title>exFuzzy Lab — From data to understanding</title>
+  <link rel="icon" type="image/png" sizes="64x64" href="./brand/favicon-64.png?v=2"><link rel="icon" type="image/png" sizes="512x512" href="./brand/exfuzzy-mark.png?v=2"><link rel="apple-touch-icon" href="./brand/apple-touch-icon.png">
+  <link rel="stylesheet" href="./style.css">
+  <script src="./app.js" defer></script>
+  <script src="./explorer.js" defer></script>
+</head>
+<body>
+<a href="#main" class="skip">Skip to workspace</a>
+<aside class="rail" aria-label="Primary navigation">
+  <a class="brand" href="./" aria-label="exFuzzy Lab home"><img src="./brand/exfuzzy-mark.png" alt="Ex-Fuzzy logo"><span>exFuzzy<span class="brand-lab">LAB</span></span></a>
+  <nav>
+    <button class="nav-item active" data-view="workspace"><span data-icon="workflow"></span>Workspace</button>
+    <button class="nav-item" data-view="experiments"><span data-icon="flask"></span>Experiments<span class="count" id="run-count">0</span></button>
+  </nav>
+  <div class="rail-divider"></div>
+  <nav>
+    <a class="nav-item" href="https://fuminides.github.io/ex-fuzzy/" target="_blank" rel="noopener"><span data-icon="external"></span>Documentation</a>
+    <a class="nav-item" href="https://github.com/Fuminides/ex-fuzzy" target="_blank" rel="noopener"><span data-icon="github"></span>GitHub</a>
+  </nav>
+</aside>
+<div class="app-shell">
+  <main id="main">
+    <p class="narrow-notice">exFuzzy Lab is designed for laptop and desktop screens. Open it on a larger screen for the full experience.</p>
+    <section class="workspace-view" id="workspace-view">
+      <div class="page-heading"><div><h1 id="page-title">Start with a dataset</h1><p id="page-sub">Import a CSV to discover interpretable fuzzy rules.</p></div><div class="page-actions"><div id="engine-status" class="engine-status" role="status" aria-live="polite" hidden><span class="spinner" id="engine-spinner" hidden></span><span id="engine-status-text"></span><button class="button subtle small" data-action="cancel" id="engine-cancel" hidden>Cancel</button></div><button class="button outline hidden" data-action="export" id="export-top"><span data-icon="download"></span>Export experiment</button><button class="button subtle" data-action="new" id="new-top"><span data-icon="plus"></span>New experiment</button></div></div>
+      <nav class="stepper" aria-label="Experiment steps">
+        <button class="step selected" data-step="data"><span class="step-num">1</span><span class="step-text"><strong>Data</strong><small id="node-data">No dataset yet</small></span></button>
+        <span class="step-sep" aria-hidden="true"></span>
+        <button class="step" data-step="prepare"><span class="step-num">2</span><span class="step-text"><strong>Prepare</strong><small id="node-prepare">Target and split</small></span></button>
+        <span class="step-sep" aria-hidden="true"></span>
+        <button class="step" data-step="model"><span class="step-num">3</span><span class="step-text"><strong>Model</strong><small id="node-model-tag">Learner and budget</small></span></button>
+        <span class="step-sep" aria-hidden="true"></span>
+        <button class="step" data-step="results"><span class="step-num">4</span><span class="step-text"><strong>Results</strong><small id="node-result">Rules and fuzzy sets</small></span></button>
+      </nav>
+      <div class="workspace-grid">
+        <section class="main-panel" id="main-panel" aria-live="polite"></section>
+        <aside class="config-panel" id="config-panel" aria-label="Experiment configuration"></aside>
+      </div>
+    </section>
+    <section id="experiments-view" class="hidden"></section>
+    <section id="explorer-view" class="explorer hidden" aria-label="Rules and fuzzy sets explorer"></section>
+    <footer class="page-footer"><span></span><span><a href="./SOURCE.html" target="_blank" rel="noopener">Source & licenses</a><span class="footer-sep">/</span>Powered by <a href="https://github.com/Fuminides/ex-fuzzy/releases/tag/v3.3.0" target="_blank" rel="noopener">exFuzzy 3.3.0</a></span></footer>
+  </main>
+</div>
+<input type="file" id="file-input" accept=".csv,.tsv,text/csv,text/tab-separated-values" hidden>
+<dialog id="modal"><button class="modal-close" aria-label="Close dialog" data-action="close-modal">×</button><div id="modal-body"></div></dialog>
+<div id="toast" role="status" class="toast hidden"></div>
+</body></html>

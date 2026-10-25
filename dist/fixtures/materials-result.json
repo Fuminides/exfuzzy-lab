@@ -1,0 +1,2088 @@
+{
+  "version": "3.3.0",
+  "learner": "FuzzyRulesClassifier",
+  "config": {
+    "n_rules": 15,
+    "n_ants": 2,
+    "n_terms": 3,
+    "n_gen": 40,
+    "pop_size": 40,
+    "seed": 42,
+    "test_size": 0.25,
+    "target": "outcome",
+    "features": [
+      "strength",
+      "temperature",
+      "process",
+      "material"
+    ],
+    "kinds": {
+      "strength": "numeric",
+      "temperature": "numeric",
+      "process": "categorical",
+      "material": "categorical",
+      "outcome": "categorical"
+    },
+    "separator": "auto"
+  },
+  "environment": {
+    "python": "3.13.2",
+    "numpy": "2.2.5",
+    "pandas": "2.3.3",
+    "scipy": "1.14.1",
+    "scikit_learn": "1.7.0"
+  },
+  "train_rows": 180,
+  "test_rows": 60,
+  "excluded_target_rows": 0,
+  "train_indices": [
+    28,
+    62,
+    72,
+    169,
+    48,
+    116,
+    240,
+    91,
+    100,
+    143,
+    79,
+    155,
+    227,
+    195,
+    90,
+    10,
+    19,
+    76,
+    224,
+    228,
+    208,
+    34,
+    134,
+    84,
+    97,
+    147,
+    166,
+    16,
+    221,
+    180,
+    87,
+    11,
+    17,
+    111,
+    115,
+    210,
+    8,
+    231,
+    15,
+    191,
+    137,
+    58,
+    113,
+    82,
+    103,
+    194,
+    23,
+    159,
+    235,
+    127,
+    164,
+    45,
+    9,
+    163,
+    80,
+    4,
+    189,
+    177,
+    183,
+    118,
+    186,
+    193,
+    136,
+    92,
+    26,
+    197,
+    83,
+    188,
+    24,
+    49,
+    56,
+    102,
+    124,
+    57,
+    67,
+    205,
+    52,
+    233,
+    66,
+    39,
+    47,
+    144,
+    86,
+    142,
+    214,
+    120,
+    212,
+    199,
+    217,
+    99,
+    5,
+    128,
+    179,
+    14,
+    29,
+    35,
+    51,
+    65,
+    40,
+    150,
+    170,
+    185,
+    173,
+    60,
+    42,
+    133,
+    126,
+    81,
+    114,
+    165,
+    61,
+    46,
+    184,
+    172,
+    148,
+    20,
+    44,
+    202,
+    239,
+    220,
+    104,
+    211,
+    22,
+    132,
+    109,
+    236,
+    176,
+    139,
+    219,
+    30,
+    167,
+    203,
+    55,
+    158,
+    68,
+    43,
+    2,
+    187,
+    108,
+    190,
+    77,
+    229,
+    94,
+    12,
+    131,
+    32,
+    122,
+    209,
+    223,
+    64,
+    200,
+    89,
+    117,
+    232,
+    222,
+    69,
+    153,
+    168,
+    21,
+    149,
+    54,
+    156,
+    93,
+    50,
+    204,
+    226,
+    78,
+    140,
+    25,
+    218,
+    207,
+    196,
+    121,
+    73,
+    215,
+    18,
+    41,
+    33,
+    3,
+    145
+  ],
+  "test_indices": [
+    7,
+    160,
+    85,
+    27,
+    162,
+    238,
+    112,
+    105,
+    74,
+    182,
+    154,
+    213,
+    230,
+    71,
+    101,
+    206,
+    106,
+    241,
+    70,
+    141,
+    125,
+    59,
+    192,
+    152,
+    53,
+    198,
+    130,
+    157,
+    36,
+    13,
+    123,
+    95,
+    98,
+    31,
+    138,
+    129,
+    6,
+    161,
+    135,
+    234,
+    174,
+    146,
+    178,
+    37,
+    181,
+    75,
+    110,
+    38,
+    88,
+    96,
+    63,
+    175,
+    171,
+    151,
+    119,
+    107,
+    216,
+    201,
+    237,
+    225
+  ],
+  "train_metrics": {
+    "accuracy": 0.9611111111111111,
+    "balanced_accuracy": 0.9605246155834086,
+    "macro_f1": 0.959395443266411
+  },
+  "test_metrics": {
+    "accuracy": 0.8833333333333333,
+    "balanced_accuracy": 0.8807285546415982,
+    "macro_f1": 0.877586709414165
+  },
+  "classes": [
+    "pass",
+    "review"
+  ],
+  "confusion": [
+    [
+      33,
+      4
+    ],
+    [
+      3,
+      20
+    ]
+  ],
+  "report": {
+    "pass": {
+      "precision": 0.9166666666666666,
+      "recall": 0.8918918918918919,
+      "f1-score": 0.9041095890410958,
+      "support": 37
+    },
+    "review": {
+      "precision": 0.8333333333333334,
+      "recall": 0.8695652173913043,
+      "f1-score": 0.851063829787234,
+      "support": 23
+    },
+    "accuracy": 0.8833333333333333,
+    "macro avg": {
+      "precision": 0.875,
+      "recall": 0.8807285546415982,
+      "f1-score": 0.877586709414165,
+      "support": 60
+    },
+    "weighted avg": {
+      "precision": 0.8847222222222222,
+      "recall": 0.8833333333333333,
+      "f1-score": 0.8837753813271155,
+      "support": 60
+    }
+  },
+  "rules": [
+    {
+      "id": 1,
+      "conditions": [
+        {
+          "feature": "strength",
+          "term": "High"
+        }
+      ],
+      "consequent": "pass",
+      "confidence": 0.9788748460099467,
+      "support": 0.5001923458027814,
+      "weight": 0.9577496920198934
+    },
+    {
+      "id": 2,
+      "conditions": [
+        {
+          "feature": "strength",
+          "term": "High"
+        },
+        {
+          "feature": "temperature",
+          "term": "Medium"
+        }
+      ],
+      "consequent": "pass",
+      "confidence": 0.9936348651425233,
+      "support": 0.23397122641321844,
+      "weight": 0.9872697302850466
+    },
+    {
+      "id": 3,
+      "conditions": [
+        {
+          "feature": "strength",
+          "term": "Medium"
+        },
+        {
+          "feature": "process",
+          "term": "annealed"
+        }
+      ],
+      "consequent": "pass",
+      "confidence": 0.9518875922735306,
+      "support": 0.24656821062944095,
+      "weight": 0.9037751845470612
+    },
+    {
+      "id": 4,
+      "conditions": [
+        {
+          "feature": "process",
+          "term": "annealed"
+        },
+        {
+          "feature": "material",
+          "term": "alloy"
+        }
+      ],
+      "consequent": "pass",
+      "confidence": 0.84,
+      "support": 0.1926605504587156,
+      "weight": 0.6799999999999999
+    },
+    {
+      "id": 5,
+      "conditions": [
+        {
+          "feature": "temperature",
+          "term": "Low"
+        },
+        {
+          "feature": "material",
+          "term": "alloy"
+        }
+      ],
+      "consequent": "pass",
+      "confidence": 0.8104490984432748,
+      "support": 0.18139319195869053,
+      "weight": 0.6208981968865497
+    },
+    {
+      "id": 6,
+      "conditions": [
+        {
+          "feature": "strength",
+          "term": "Low"
+        },
+        {
+          "feature": "material",
+          "term": "polymer"
+        }
+      ],
+      "consequent": "review",
+      "confidence": 0.9345036083479618,
+      "support": 0.4031164285594089,
+      "weight": 0.8690072166959235
+    },
+    {
+      "id": 7,
+      "conditions": [
+        {
+          "feature": "strength",
+          "term": "Low"
+        },
+        {
+          "feature": "process",
+          "term": "untreated"
+        }
+      ],
+      "consequent": "review",
+      "confidence": 0.9999999999999998,
+      "support": 0.26159826341561904,
+      "weight": 0.9999999999999996
+    },
+    {
+      "id": 8,
+      "conditions": [
+        {
+          "feature": "strength",
+          "term": "Low"
+        },
+        {
+          "feature": "temperature",
+          "term": "High"
+        }
+      ],
+      "consequent": "review",
+      "confidence": 0.9360704007129412,
+      "support": 0.22944236506253762,
+      "weight": 0.8721408014258825
+    },
+    {
+      "id": 9,
+      "conditions": [
+        {
+          "feature": "strength",
+          "term": "Low"
+        },
+        {
+          "feature": "material",
+          "term": "alloy"
+        }
+      ],
+      "consequent": "review",
+      "confidence": 0.7489472919994192,
+      "support": 0.2603866929173607,
+      "weight": 0.49789458399883846
+    },
+    {
+      "id": 10,
+      "conditions": [
+        {
+          "feature": "strength",
+          "term": "Medium"
+        },
+        {
+          "feature": "process",
+          "term": "untreated"
+        }
+      ],
+      "consequent": "review",
+      "confidence": 0.7939141977807121,
+      "support": 0.24295638339791786,
+      "weight": 0.5878283955614243
+    }
+  ],
+  "rules_text": "Rules for consequent: pass\n----------------\nIF strength IS High WITH DS 0.9577496920198934, ACC 0.9788748460099467, WGHT 0.9577496920198934\nIF strength IS High AND temperature IS Medium WITH DS 0.9872697302850466, ACC 0.9936348651425233, WGHT 0.9872697302850466\nIF strength IS Medium AND process IS annealed WITH DS 0.9037751845470612, ACC 0.9518875922735306, WGHT 0.9037751845470612\nIF process IS annealed AND material IS alloy WITH DS 0.6799999999999999, ACC 0.84, WGHT 0.6799999999999999\nIF temperature IS Low AND material IS alloy WITH DS 0.6208981968865497, ACC 0.8104490984432748, WGHT 0.6208981968865497\n\nRules for consequent: review\n----------------\nIF strength IS Low AND material IS polymer WITH DS 0.8690072166959235, ACC 0.9345036083479618, WGHT 0.8690072166959235\nIF strength IS Low AND process IS untreated WITH DS 0.9999999999999996, ACC 0.9999999999999998, WGHT 0.9999999999999996\nIF strength IS Low AND temperature IS High WITH DS 0.8721408014258825, ACC 0.9360704007129412, WGHT 0.8721408014258825\nIF strength IS Low AND material IS alloy WITH DS 0.49789458399883846, ACC 0.7489472919994192, WGHT 0.49789458399883846\nIF strength IS Medium AND process IS untreated WITH DS 0.5878283955614243, ACC 0.7939141977807121, WGHT 0.5878283955614243\n\n",
+  "variables": [
+    {
+      "name": "strength",
+      "kind": "numeric",
+      "x": [
+        50.1,
+        52.51375,
+        54.9275,
+        57.34125,
+        59.755,
+        62.16875,
+        64.5825,
+        66.99625,
+        69.41,
+        71.82375,
+        74.2375,
+        76.65125,
+        79.065,
+        81.47874999999999,
+        83.8925,
+        86.30625,
+        88.72,
+        91.13374999999999,
+        93.5475,
+        95.96125,
+        98.375,
+        100.78875,
+        103.2025,
+        105.61625000000001,
+        108.03,
+        110.44375,
+        112.85749999999999,
+        115.27125000000001,
+        117.685,
+        120.09875,
+        122.51249999999999,
+        124.92625000000001,
+        127.34,
+        129.75375,
+        132.1675,
+        134.58124999999998,
+        136.995,
+        139.40875,
+        141.8225,
+        144.23624999999998,
+        146.65,
+        149.06375,
+        151.4775,
+        153.89124999999999,
+        156.305,
+        158.71875,
+        161.1325,
+        163.54625,
+        165.95999999999998,
+        168.37375,
+        170.7875,
+        173.20125,
+        175.61499999999998,
+        178.02875,
+        180.4425,
+        182.85625,
+        185.26999999999998,
+        187.68374999999997,
+        190.0975,
+        192.51125,
+        194.92499999999998,
+        197.33874999999998,
+        199.7525,
+        202.16625,
+        204.57999999999998,
+        206.99374999999998,
+        209.40749999999997,
+        211.82125,
+        214.23499999999999,
+        216.64874999999998,
+        219.06249999999997,
+        221.47625,
+        223.89,
+        226.30374999999998,
+        228.71749999999997,
+        231.13125,
+        233.545,
+        235.95874999999998,
+        238.37249999999997,
+        240.78625,
+        243.2
+      ],
+      "terms": [
+        {
+          "name": "Low",
+          "y": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.9983572281959376,
+            0.854166666666667,
+            0.7099761051373945,
+            0.5657855436081238,
+            0.4215949820788531,
+            0.27740442054958236,
+            0.13321385902030994,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "parameters": [
+            50.0999,
+            50.0999,
+            132.14,
+            148.88
+          ]
+        },
+        {
+          "name": "Medium",
+          "y": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.0016427718040623294,
+            0.14583333333333304,
+            0.2900238948626055,
+            0.43421445639187617,
+            0.578405017921147,
+            0.7225955794504176,
+            0.8667861409796901,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.879288437102924,
+            0.7259371029224907,
+            0.5725857687420592,
+            0.4192344345616277,
+            0.2658831003811962,
+            0.1125317662007629,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "parameters": [
+            132.14,
+            148.88,
+            164.06,
+            179.8
+          ]
+        },
+        {
+          "name": "High",
+          "y": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.12071156289707599,
+            0.2740628970775093,
+            0.4274142312579408,
+            0.5807655654383723,
+            0.7341168996188038,
+            0.8874682337992371,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "parameters": [
+            164.06,
+            179.8,
+            243.2001,
+            243.2001
+          ]
+        }
+      ]
+    },
+    {
+      "name": "temperature",
+      "kind": "numeric",
+      "x": [
+        40.3,
+        41.17125,
+        42.0425,
+        42.91375,
+        43.785,
+        44.65625,
+        45.527499999999996,
+        46.39875,
+        47.269999999999996,
+        48.14125,
+        49.012499999999996,
+        49.88375,
+        50.754999999999995,
+        51.62625,
+        52.4975,
+        53.36875,
+        54.239999999999995,
+        55.11125,
+        55.9825,
+        56.85375,
+        57.724999999999994,
+        58.59625,
+        59.4675,
+        60.33875,
+        61.21,
+        62.08125,
+        62.9525,
+        63.823750000000004,
+        64.695,
+        65.56625,
+        66.4375,
+        67.30875,
+        68.18,
+        69.05125,
+        69.9225,
+        70.79375,
+        71.66499999999999,
+        72.53625,
+        73.4075,
+        74.27875,
+        75.15,
+        76.02125000000001,
+        76.8925,
+        77.76375,
+        78.63499999999999,
+        79.50625,
+        80.3775,
+        81.24875,
+        82.12,
+        82.99125000000001,
+        83.86250000000001,
+        84.73375,
+        85.605,
+        86.47625,
+        87.3475,
+        88.21875,
+        89.09,
+        89.96125,
+        90.83250000000001,
+        91.70375,
+        92.575,
+        93.44624999999999,
+        94.3175,
+        95.18875,
+        96.06,
+        96.93125,
+        97.80250000000001,
+        98.67375000000001,
+        99.545,
+        100.41625,
+        101.2875,
+        102.15875,
+        103.03,
+        103.90125,
+        104.77250000000001,
+        105.64375,
+        106.515,
+        107.38625,
+        108.25750000000001,
+        109.12875,
+        110
+      ],
+      "terms": [
+        {
+          "name": "Low",
+          "y": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.9549180327868855,
+            0.8954064207650273,
+            0.8358948087431691,
+            0.7763831967213115,
+            0.7168715846994539,
+            0.6573599726775957,
+            0.5978483606557375,
+            0.5383367486338798,
+            0.4788251366120217,
+            0.419313524590164,
+            0.3598019125683059,
+            0.30029030054644773,
+            0.24077868852459056,
+            0.18126707650273238,
+            0.12175546448087424,
+            0.06224385245901608,
+            0.002732240437157926,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "parameters": [
+            40.299899999999994,
+            40.299899999999994,
+            53.58,
+            68.22
+          ]
+        },
+        {
+          "name": "Medium",
+          "y": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.04508196721311452,
+            0.10459357923497267,
+            0.16410519125683082,
+            0.2236168032786885,
+            0.28312841530054617,
+            0.34264002732240434,
+            0.40215163934426246,
+            0.46166325136612013,
+            0.5211748633879782,
+            0.580686475409836,
+            0.6401980874316942,
+            0.6997096994535523,
+            0.7592213114754095,
+            0.8187329234972676,
+            0.8782445355191257,
+            0.9377561475409839,
+            0.9972677595628421,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.9459231805929913,
+            0.8872136118598384,
+            0.8285040431266846,
+            0.7697944743935317,
+            0.7110849056603779,
+            0.6523753369272239,
+            0.5936657681940701,
+            0.5349561994609162,
+            0.4762466307277624,
+            0.4175370619946095,
+            0.35882749326145563,
+            0.3001179245283027,
+            0.24140835579514888,
+            0.18269878706199502,
+            0.12398921832884117,
+            0.06527964959568731,
+            0.006570080862533461,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "parameters": [
+            53.58,
+            68.22,
+            83.06,
+            97.9
+          ]
+        },
+        {
+          "name": "High",
+          "y": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.05407681940700869,
+            0.11278638814016158,
+            0.17149595687331545,
+            0.23020552560646834,
+            0.2889150943396222,
+            0.34762466307277606,
+            0.4063342318059299,
+            0.4650438005390838,
+            0.5237533692722376,
+            0.5824629380053905,
+            0.6411725067385443,
+            0.6998820754716972,
+            0.7585916442048511,
+            0.817301212938005,
+            0.8760107816711589,
+            0.9347203504043127,
+            0.9934299191374666,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "parameters": [
+            83.06,
+            97.9,
+            110.0001,
+            110.0001
+          ]
+        }
+      ]
+    },
+    {
+      "name": "process",
+      "kind": "categorical",
+      "terms": [
+        {
+          "name": "annealed",
+          "category": "annealed"
+        },
+        {
+          "name": "tempered",
+          "category": "tempered"
+        },
+        {
+          "name": "untreated",
+          "category": "untreated"
+        }
+      ]
+    },
+    {
+      "name": "material",
+      "kind": "categorical",
+      "terms": [
+        {
+          "name": "alloy",
+          "category": "alloy"
+        },
+        {
+          "name": "polymer",
+          "category": "polymer"
+        }
+      ]
+    }
+  ],
+  "preprocessing": [
+    {
+      "name": "strength",
+      "kind": "numeric",
+      "median": 156.39999999999998
+    },
+    {
+      "name": "temperature",
+      "kind": "numeric",
+      "median": 75.55000000000001
+    },
+    {
+      "name": "process",
+      "kind": "categorical",
+      "categories": [
+        "annealed",
+        "tempered",
+        "untreated"
+      ],
+      "unseen_test": 0
+    },
+    {
+      "name": "material",
+      "kind": "categorical",
+      "categories": [
+        "alloy",
+        "polymer"
+      ],
+      "unseen_test": 0
+    }
+  ],
+  "predictions": [
+    {
+      "row": 7,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "146.8",
+        "temperature": "109.1",
+        "process": "tempered",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 160,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "168.9",
+        "temperature": "88.3",
+        "process": "tempered",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 85,
+      "actual": "review",
+      "predicted": "pass",
+      "correct": false,
+      "fallback": false,
+      "values": {
+        "strength": "168.0",
+        "temperature": "107.2",
+        "process": "tempered",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 27,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "206.1",
+        "temperature": "92.9",
+        "process": "annealed",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 162,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "172.4",
+        "temperature": "41.8",
+        "process": "tempered",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 238,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "173.8",
+        "temperature": "77.2",
+        "process": "tempered",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 112,
+      "actual": "pass",
+      "predicted": "review",
+      "correct": false,
+      "fallback": false,
+      "values": {
+        "strength": "132.5",
+        "temperature": "66.6",
+        "process": "annealed",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 105,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "145.0",
+        "temperature": "60.1",
+        "process": "annealed",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 74,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "218.1",
+        "temperature": "73.2",
+        "process": "tempered",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 182,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "186.8",
+        "temperature": "50.2",
+        "process": "annealed",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 154,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": true,
+      "values": {
+        "strength": "152.1",
+        "temperature": "90.4",
+        "process": "tempered",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 213,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "165.3",
+        "temperature": "69.3",
+        "process": "tempered",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 230,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "123.3",
+        "temperature": "73.9",
+        "process": "annealed",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 71,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "159.8",
+        "temperature": "76.3",
+        "process": "untreated",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 101,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "125.7",
+        "temperature": "41.7",
+        "process": "untreated",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 206,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "162.2",
+        "temperature": "46.7",
+        "process": "tempered",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 106,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "194.1",
+        "temperature": "76.1",
+        "process": "annealed",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 241,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "214.5",
+        "temperature": "97.8",
+        "process": "untreated",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 70,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "120.9",
+        "temperature": null,
+        "process": "tempered",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 141,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "86.1",
+        "temperature": "84.7",
+        "process": "tempered",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 125,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "184.1",
+        "temperature": "56.5",
+        "process": "tempered",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 59,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": true,
+      "values": {
+        "strength": "162.9",
+        "temperature": "75.8",
+        "process": "tempered",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 192,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "158.2",
+        "temperature": "53.6",
+        "process": "annealed",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 152,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "124.3",
+        "temperature": "86.4",
+        "process": "annealed",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 53,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "178.2",
+        "temperature": "79.7",
+        "process": "untreated",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 198,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "114.1",
+        "temperature": "46.3",
+        "process": "annealed",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 130,
+      "actual": "pass",
+      "predicted": "review",
+      "correct": false,
+      "fallback": false,
+      "values": {
+        "strength": "147.1",
+        "temperature": "43.4",
+        "process": "tempered",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 157,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "115.1",
+        "temperature": "55.0",
+        "process": "tempered",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 36,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "130.2",
+        "temperature": "94.2",
+        "process": "annealed",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 13,
+      "actual": "review",
+      "predicted": "pass",
+      "correct": false,
+      "fallback": false,
+      "values": {
+        "strength": "169.4",
+        "temperature": "76.0",
+        "process": "untreated",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 123,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "142.2",
+        "temperature": null,
+        "process": "untreated",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 95,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "119.1",
+        "temperature": "51.3",
+        "process": "untreated",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 98,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "144.3",
+        "temperature": "91.0",
+        "process": "tempered",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 31,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "159.9",
+        "temperature": "102.2",
+        "process": "untreated",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 138,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "178.7",
+        "temperature": "65.9",
+        "process": "tempered",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 129,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "200.5",
+        "temperature": "73.2",
+        "process": "tempered",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 6,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "172.9",
+        "temperature": "79.1",
+        "process": "annealed",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 161,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "175.8",
+        "temperature": "67.6",
+        "process": "annealed",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 135,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "114.0",
+        "temperature": "81.9",
+        "process": "tempered",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 234,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "198.0",
+        "temperature": "74.8",
+        "process": "untreated",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 174,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "136.1",
+        "temperature": "44.1",
+        "process": "tempered",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 146,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "128.4",
+        "temperature": "82.4",
+        "process": "untreated",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 178,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "194.9",
+        "temperature": "45.2",
+        "process": "annealed",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 37,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "174.2",
+        "temperature": "69.2",
+        "process": "untreated",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 181,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "208.8",
+        "temperature": "48.7",
+        "process": "tempered",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 75,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "138.7",
+        "temperature": "102.5",
+        "process": "untreated",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 110,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "168.6",
+        "temperature": "94.8",
+        "process": "tempered",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 38,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "140.5",
+        "temperature": "64.7",
+        "process": "annealed",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 88,
+      "actual": "pass",
+      "predicted": "review",
+      "correct": false,
+      "fallback": false,
+      "values": {
+        "strength": "136.4",
+        "temperature": "103.6",
+        "process": "annealed",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 96,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "158.3",
+        "temperature": "94.8",
+        "process": "annealed",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 63,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "126.9",
+        "temperature": "68.0",
+        "process": "untreated",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 175,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "191.5",
+        "temperature": "105.2",
+        "process": "annealed",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 171,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "194.1",
+        "temperature": "60.3",
+        "process": "untreated",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 151,
+      "actual": "pass",
+      "predicted": "review",
+      "correct": false,
+      "fallback": false,
+      "values": {
+        "strength": "160.4",
+        "temperature": "43.8",
+        "process": "untreated",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 119,
+      "actual": "review",
+      "predicted": "pass",
+      "correct": false,
+      "fallback": false,
+      "values": {
+        "strength": "176.4",
+        "temperature": "98.5",
+        "process": "untreated",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 107,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": true,
+      "values": {
+        "strength": "160.5",
+        "temperature": "86.0",
+        "process": "tempered",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 216,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "156.7",
+        "temperature": "67.7",
+        "process": "tempered",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 201,
+      "actual": "pass",
+      "predicted": "pass",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "158.9",
+        "temperature": "63.2",
+        "process": "annealed",
+        "material": "alloy"
+      }
+    },
+    {
+      "row": 237,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "120.9",
+        "temperature": "81.8",
+        "process": "untreated",
+        "material": "polymer"
+      }
+    },
+    {
+      "row": 225,
+      "actual": "review",
+      "predicted": "review",
+      "correct": true,
+      "fallback": false,
+      "values": {
+        "strength": "139.8",
+        "temperature": "58.1",
+        "process": "untreated",
+        "material": "polymer"
+      }
+    }
+  ],
+  "conditions": 19,
+  "elapsed": 0.273,
+  "notes": [
+    "3 test rows fired no rule and used the training majority class."
+  ],
+  "warnings": [],
+  "name": "Experiment 01",
+  "fileName": "materials.csv",
+  "created": "2026-10-23T16:22:34.533Z"
+}
