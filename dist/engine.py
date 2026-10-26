@@ -7,11 +7,13 @@ Numerical partitions, categorical memberships, rule mining, genetic selection
 and tree growth are library code. Preprocessing and partitions are fitted to
 training rows only.
 """
+import base64
 import contextlib
 import io
 import hashlib
 import json
 import math
+import pickle
 import platform
 import time
 import warnings
@@ -24,7 +26,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, confusion_matrix, classification_report
 
 import ex_fuzzy
-from ex_fuzzy import FuzzyRulesClassifier, FERL, RuleMineClassifier, RuleFineTuneClassifier, fuzzy_sets as fs, utils
+from ex_fuzzy import FuzzyRulesClassifier, FERL, RuleMineClassifier, RuleFineTuneClassifier, fuzzy_sets as fs, persistence, utils
 
 try:
     import pymoo
@@ -288,6 +290,11 @@ def run_experiment(csv_text, config):
                      + (" (the learner itself returns no class for them)." if evolutionary else "."))
     if missing_target:
         notes.append(f"{missing_target} rows with a missing target were excluded before splitting.")
+    # The trained model and its preprocessing, reloadable with load_model.py from the saved bundle.
+    saved = dict(format="exfuzzy-lab-model/1", exfuzzy=VERSION, learner=learner["cls"], learner_key=learner_key,
+                 learner_label=learner["label"], target=target, features=features, classes=[str(c) for c in model.classes_],
+                 preprocessing=preprocessing, majority=majority, model=model)
+    model_b64 = base64.b64encode(pickle.dumps(saved, protocol=4)).decode("ascii")
     return dict(version=VERSION, learner=learner["cls"], learner_key=learner_key, learner_label=learner["label"], config=config,
                 dataset_sha256=hashlib.sha256(csv_text.encode("utf-8")).hexdigest(),
                 environment=dict(python=platform.python_version(), numpy=np.__version__, pandas=pd.__version__,
@@ -298,8 +305,8 @@ def run_experiment(csv_text, config):
                 classes=[str(c) for c in model.classes_],
                 confusion=confusion_matrix(y[test_i], test_pred, labels=model.classes_).tolist(),
                 report=classification_report(y[test_i], test_pred, labels=model.classes_, output_dict=True, zero_division=0),
-                rules=rules_out, rules_text=rules_text,
-                variables=variables, preprocessing=preprocessing, predictions=predictions,
+                rules=rules_out, rules_text=rules_text, fuzzy_sets_text=persistence.save_fuzzy_variables(partitions),
+                model_b64=model_b64, variables=variables, preprocessing=preprocessing, predictions=predictions,
                 conditions=sum(len(r["conditions"]) for r in rules_out), elapsed=round(time.perf_counter()-started, 3),
                 notes=notes, warnings=captured)
 

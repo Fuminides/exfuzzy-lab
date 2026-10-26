@@ -44,7 +44,7 @@ The browser engine uses PyMoo 0.6.1.6, vendored in `dist/vendor/` with its depen
 
 Classification only, T1 only. 10–5,000 rows, up to 12 predictors, 24 training categories per categorical predictor, 2–12 target classes and at least 3 rows per class. CSV/TSV size limit: 2 MB. Numeric terms: 2–5. Maximum rule conditions: 1–3. Training can be canceled by terminating the worker. Runs are kept only in tab memory; refresh clears them. No server-side data storage, accounts or cross-session experiment history is implemented.
 
-The exported ZIP includes the original dataset, configuration, results, predictions, rules and `experiment.py` (the same code as `engine.py`) with pinned Python requirements. Native package platforms can differ from WASM; floating-point differences may change genetic results across platforms.
+Save model downloads a ZIP with `model.pkl` (the trained model and its preprocessing) and `load_model.py` to predict new rows, plus the original dataset, configuration, results, predictions, rules and `experiment.py` (the same code as `engine.py`) with pinned Python requirements. Native package platforms can differ from WASM; floating-point differences may change genetic results across platforms.
 
 ## Source and licenses
 
