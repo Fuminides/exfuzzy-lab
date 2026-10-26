@@ -14,31 +14,9 @@ Open `http://localhost:8000`. HTTPS or localhost is required. Opening `index.htm
 
 ## What runs
 
-`dist/worker.js` runs `dist/engine.py` in an isolated Python Web Worker. It installs PyMoo 0.6.1.6 and the unmodified official `ex_fuzzy-3.3.0-py3-none-any.whl`, with SHA-256:
-
-```text
-56015f555ad627f4a097fdd470dc067b9cc38fc51f2a755b14d33ac9c556fa07
-```
-
-The learner is chosen in the experiment settings (`config.learner`):
-
-- `association_additive` (default): the library's `FuzzyRulesClassifier` with fixed partitions, fuzzy association rule mining, native genetic rule selection and additive weighted voting.
-- `association_sufficient`: the same classifier with `rule_mode="sufficient"`, where only each class's strongest matching rule counts.
-- `ferl`: the library's `FERL` fuzzy rule tree on the same partitions; the rule budget bounds the tree size and the maximum conditions per rule bounds its depth. Tree nodes are exported as rules (no weight).
-- `rule_mine` and `rule_finetune`: the library's `RuleMineClassifier` and `RuleFineTuneClassifier`, which mine candidate rules and let PyMoo's genetic algorithm select (and, for fine-tune, re-optimize) the rule base on the same partitions.
+`dist/worker.js` runs `dist/engine.py` in an isolated Python Web Worker. It installs PyMoo 0.6.1.6 and the unmodified official `ex_fuzzy-3.3.0-py3-none-any.whl`.
 
 The browser engine uses PyMoo 0.6.1.6, vendored in `dist/vendor/` with its dependencies as pure-Python wheels.
-
-## Research protocol
-
-- Seeded stratified holdout; 15–40% test fraction.
-- Numeric medians, category vocabularies and fuzzy partitions are fitted to training rows only.
-- Missing target rows are excluded before splitting.
-- Unseen test categories fire no categorical term; rows firing no rules use the learner's training majority fallback and are flagged.
-- Confidence/support shown for rules come from training data. Certainty-factor weights and normalized rule scores are not calibrated probabilities.
-- Macro F1, balanced accuracy, accuracy, per-class metrics, confusion matrix and held-out predictions are computed from actual model predictions.
-- Configurations, exact row assignments, preprocessing state and library environment are included in exports.
-- Repeated tuning against a holdout biases its estimate. A separate final evaluation dataset is appropriate for research reporting.
 
 ## Scope and limits
 
