@@ -1,6 +1,6 @@
 # exFuzzy Lab
 
-A visual research workspace, in English, for Type-1 fuzzy classification with **ex-fuzzy 3.3.0**.
+A visual research workspace, in English, for Type-1 fuzzy classification with **ex-fuzzy 3.3.1**.
 Try it here: [ExFuzzy Lab](https://fuminides.github.io/exfuzzy-lab/)
 
 ## Run
@@ -15,7 +15,7 @@ Open `http://localhost:8000`. HTTPS or localhost is required. Opening `index.htm
 
 ## What runs
 
-`dist/worker.js` runs `dist/engine.py` in an isolated Python Web Worker. It installs PyMoo 0.6.1.6 and the unmodified official `ex_fuzzy-3.3.0-py3-none-any.whl`.
+`dist/worker.js` runs `dist/engine.py` in an isolated Python Web Worker. It installs PyMoo 0.6.1.6 and the unmodified official `ex_fuzzy-3.3.1-py3-none-any.whl`.
 
 The browser engine uses PyMoo 0.6.1.6, vendored in `dist/vendor/` with its dependencies as pure-Python wheels.
 
@@ -27,6 +27,6 @@ Save model downloads a ZIP with `model.pkl` (the trained model and its preproces
 
 ## Source and licenses
 
-App: AGPL-3.0-or-later, see `LICENSE`. exFuzzy: AGPL-3.0-or-later, see `dist/EXFUZZY-LICENSE.txt` and [release source](https://github.com/Fuminides/ex-fuzzy/tree/v3.3.0).
+App: AGPL-3.0-or-later, see `LICENSE`. exFuzzy: AGPL-3.0-or-later, see `dist/EXFUZZY-LICENSE.txt` and [release source](https://github.com/Fuminides/ex-fuzzy/tree/v3.3.1).
 
 Source download links are on the Source & licenses page linked in the footer. Iris is scikit-learn's standard Iris dataset; material screening is synthetic with seed 2026, explicitly labeled in the interface. The brand mark in `dist/brand/` is the official Ex-Fuzzy logo from the ex-fuzzy repository README. Interface icons and diagrams are original SVG/CSS artwork. DM Sans and Manrope are served by Google Fonts under their respective Open Font Licenses.

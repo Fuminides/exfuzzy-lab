@@ -78,7 +78,7 @@ class SavedModel:
 
 def load_model(path="model.pkl"):
     # ex-fuzzy 3.3.0 builds its pymoo problem class on first use, and models from the genetic learners
-    # refer to it, so it has to exist before unpickling in a new process.
+    # refer to it, so it has to exist before unpickling in a new process. 3.3.1 builds it on lookup.
     from ex_fuzzy import _problem
     build = getattr(_problem, "_pymoo_problem_class", None)
     if build is not None:

@@ -1,6 +1,6 @@
 """exFuzzy Lab: the same experiment runs in the browser and in Python.
 
-The learner is an ex_fuzzy 3.3.0 classifier chosen in config["learner"]:
+The learner is an ex_fuzzy 3.3.1 classifier chosen in config["learner"]:
 FuzzyRulesClassifier (additive or sufficient rule voting), FERL (a fuzzy
 rule tree), or the PyMoo-based RuleMineClassifier and RuleFineTuneClassifier.
 Numerical partitions, categorical memberships, rule mining, genetic selection
@@ -35,7 +35,7 @@ try:
 except Exception:  # pragma: no cover - PyMoo is required by ex-fuzzy; this only keeps the report informative
     PYMOO_VERSION = None
 
-VERSION = "3.3.0"
+VERSION = "3.3.1"
 # All learners run in the browser engine: the app vendors PyMoo as a pure-Python wheel.
 LEARNERS = {
     "association_additive": dict(label="Association rules, additive voting", cls="FuzzyRulesClassifier", rule_mode="additive"),
@@ -146,7 +146,7 @@ def _metrics(y, pred):
 
 def run_experiment(csv_text, config):
     if ex_fuzzy.__version__ != VERSION:
-        raise ValueError("This experiment requires ex-fuzzy==3.3.0.")
+        raise ValueError("This experiment requires ex-fuzzy==3.3.1.")
     started = time.perf_counter()
     question_mark_missing = bool(config.get("question_mark_missing", True))
     frame = read_frame(csv_text, config.get("separator", "auto"), question_mark_missing)

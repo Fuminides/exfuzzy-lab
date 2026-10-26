@@ -247,7 +247,7 @@ function categoricalSVG(v,o){
 }
 function downloadSVG(){
  const d=exData(),v=exVariable(ex.variable);if(!d||!v)return;
- const title=`${v.name} — ${v.kind==='numeric'?'membership functions':'categorical sets'} (${d.name||'experiment'}, exFuzzy ${d.version||'3.3.0'})`;
+ const title=`${v.name} — ${v.kind==='numeric'?'membership functions':'categorical sets'} (${d.name||'experiment'}, exFuzzy ${d.version||'3.3.1'})`;
  const svg=v.kind==='numeric'?numericChartSVG(v,{width:960,plotHeight:400,highlight:ex.term,legend:true,standalone:true,title}):categoricalSVG(v,{highlight:ex.term,title});
  download(`exfuzzy-${slug(d.name||'experiment')}-${slug(v.name)}-sets.svg`,'<?xml version="1.0" encoding="UTF-8"?>\n'+svg.replace(' tabindex="0"',''),'image/svg+xml');
  toast(`SVG downloaded for ${v.name}, with axis labels and legend.`);

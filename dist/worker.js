@@ -19,7 +19,7 @@ async function initialize() {
     // speed-ups are absent in the browser, so it uses its own Python fallbacks. `moocore` is a stub that
     // only lets PyMoo import: exFuzzy's single-objective search never computes hypervolume indicators.
     const wheels = ['moocore-0.0.0+exfuzzy.lab.stub', 'wrapt-2.5.1', 'deprecated-3.0.0', 'about_time-4.2.2', 'grapheme-0.5.0',
-                    'alive_progress-3.3.0', 'autograd-1.9.1', 'cma-4.5.0', 'pymoo-0.6.1.6', 'ex_fuzzy-3.3.0'];
+                    'alive_progress-3.3.0', 'autograd-1.9.1', 'cma-4.5.0', 'pymoo-0.6.1.6', 'ex_fuzzy-3.3.1'];
     for (const name of wheels) {
       self.postMessage({type:'progress', message: name.startsWith('ex_fuzzy') ? 'Loading exFuzzy (step 4 of 4)…' : 'Loading PyMoo (step 3 of 4)…'});
       python.globals.set('wheel_url', new URL('./vendor/' + name + '-py3-none-any.whl', self.location.href).href);
