@@ -92,10 +92,11 @@ async function loadFile(file){
  try{inspectLocal(await file.text(),file.name);}catch(e){toast('The file could not be read.',true);}
 }
 /* Dataset inspection runs in JavaScript so the Data step never waits for Python. It mirrors engine.inspect_dataset:
-   pandas' default missing-value tokens, numeric columns when every present value parses as a number (infinities count
+   pandas' default missing-value tokens plus '?', numeric columns when every present value parses as a number (infinities count
    as missing, as the engine replaces them), and exFuzzy's rule that a whole-numbered column with at most 5 distinct
-   values is categorical. The detected separator is passed to the engine so both read the file the same way. */
-const NA_TOKENS=new Set(['','#N/A','#N/A N/A','#NA','-1.#IND','-1.#QNAN','-NaN','-nan','1.#IND','1.#QNAN','<NA>','N/A','NA','NULL','NaN','None','n/a','nan','null']);
+   values is categorical. The detected separator is passed to the engine so both read the file the same way.
+   '?' is read as missing unless qmarkMissing is false; the user confirms that choice before training. */
+const NA_TOKENS=new Set(['','?','#N/A','#N/A N/A','#NA','-1.#IND','-1.#QNAN','-NaN','-nan','1.#IND','1.#QNAN','<NA>','N/A','NA','NULL','NaN','None','n/a','nan','null']);
 const NUM_RE=/^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/,INF_RE=/^[+-]?inf(inity)?$/i;
 function parseCSV(text,sep){
  const rows=[];let row=[],field='',quoted=false;
@@ -113,40 +114,56 @@ function detectSeparator(text){
  for(const c of [',',';','\t','|']){const counts=lines.map(l=>l.split(c).length-1);const min=Math.min(...counts),max=Math.max(...counts);const score=min>0?(min===max?min*10:min):-1;if(score>bestScore){bestScore=score;best=c;}}
  return best;
 }
-function inspectCSV(text,separator='auto'){
+function inspectCSV(text,separator='auto',qmarkMissing=true){
  const sep=separator==='auto'?detectSeparator(text):separator;
  const rows=parseCSV(text,sep);if(rows.length<2)throw Error('The file needs a header row and data rows.');
  const header=rows[0].map(h=>String(h).trim()),data=rows.slice(1);
  if(new Set(header).size!==header.length)throw Error('Column names must be unique after trimming whitespace.');
  if(header.length<2)throw Error('The file needs at least one predictor and a target column. Check the delimiter.');
  if(data.length<10||data.length>5000)throw Error('This browser workspace supports 10 to 5,000 rows per dataset.');
+ const isNA=v=>NA_TOKENS.has(v)&&(qmarkMissing||v!=='?');
  const columns=header.map((name,j)=>{
-  const raw=data.map(r=>(r[j]??'').trim()),present=raw.filter(v=>!NA_TOKENS.has(v));
+  const raw=data.map(r=>(r[j]??'').trim()),present=raw.filter(v=>!isNA(v)),question=raw.filter(v=>v==='?').length;
   const numeric=present.length>0&&present.every(v=>NUM_RE.test(v)||INF_RE.test(v));
   const values=numeric?present.filter(v=>!INF_RE.test(v)).map(Number):present;
   const uniq=[...new Set(values)];
   const kind=values.length===0?'numeric':!numeric?'categorical':(uniq.length<=5&&uniq.every(v=>Math.floor(v)===v))?'categorical':'numeric';
-  return {name,kind,unique:uniq.length,missing:raw.length-values.length,examples:uniq.slice(0,4).map(String),numeric};
+  return {name,kind,unique:uniq.length,missing:raw.length-values.length,examples:uniq.slice(0,4).map(String),numeric,question};
  });
- const cell=(v,col)=>{v=(v??'').trim();if(NA_TOKENS.has(v))return null;if(col.numeric)return INF_RE.test(v)?null:Number(v);return v;};
+ const cell=(v,col)=>{v=(v??'').trim();if(isNA(v))return null;if(col.numeric)return INF_RE.test(v)?null:Number(v);return v;};
  const preview=data.slice(0,8).map(r=>Object.fromEntries(header.map((name,j)=>[name,cell(r[j],columns[j])])));
  const missing=columns.reduce((n,c)=>n+c.missing,0);
- return {rows:data.length,columns:columns.map(({numeric,...c})=>c),preview,missing,separator:sep};
+ const qmark={cells:columns.reduce((n,c)=>n+c.question,0),columns:columns.filter(c=>c.question).length};
+ return {rows:data.length,columns:columns.map(({numeric,question,...c})=>c),preview,missing,separator:sep,qmark};
 }
 function inspectLocal(csv,fileName){
  try{
   const meta=inspectCSV(csv,state.separator);
-  state.csv=csv;state.fileName=fileName;state.meta=meta;state.separator=meta.separator;
+  state.csv=csv;state.fileName=fileName;state.meta=meta;state.separator=meta.separator;state.qmark=null;
   state.target=meta.columns.at(-1).name;state.features=meta.columns.filter(c=>c.name!==state.target).slice(0,12).map(c=>c.name);
   state.kinds=Object.fromEntries(meta.columns.map(c=>[c.name,c.kind]));state.step='data';state.view='workspace';render();
   warmEngine();
  }catch(e){modal(`<h2 class="modal-title">This file can't be used yet.</h2><p class="modal-description">${esc(e.message)}</p><div class="modal-actions"><button class="button primary" data-action="close-modal">Back to workspace</button></div>`);}
 }
+/* A file with '?' cells needs the user's word on what '?' means before it trains. */
+const qmarkPending=()=>state.meta?.qmark?.cells>0&&state.qmark==null;
+function setQmark(missing){
+ if(!state.csv||state.busy)return;
+ if(missing!==(state.qmark!==false)){const meta=inspectCSV(state.csv,state.separator,missing);state.meta=meta;state.kinds=Object.fromEntries(meta.columns.map(c=>[c.name,c.kind]));}
+ state.qmark=missing;render();
+}
+function qmarkNote(){
+ const q=state.meta.qmark;if(!q?.cells)return '';
+ const where=`${q.cells.toLocaleString()} cell${q.cells===1?'':'s'} across ${q.columns} column${q.columns===1?'':'s'}`,dis=state.busy?'disabled':'';
+ if(state.qmark==null)return `<div class="note warning qmark-note" role="status"><div><strong>'?' appears in ${where}.</strong> Many datasets use it to mark missing values. Check that this holds for your file before training.</div><div class="qmark-actions"><button class="button primary small" data-action="qmark-missing" ${dis}>Treat as missing</button><button class="button subtle small" data-action="qmark-text" ${dis}>Keep as text</button></div></div>`;
+ return `<div class="note qmark-note">${state.qmark?`'?' is read as a missing value in ${where}.`:`'?' is kept as a text value in ${where}.`}<button class="button subtle small" data-action="${state.qmark?'qmark-text':'qmark-missing'}" ${dis}>${state.qmark?'Keep as text instead':'Treat as missing instead'}</button></div>`;
+}
 function currentRun(){return state.runs[state.activeRun];}
-function configSnapshot(){return {...state.config,target:state.target,features:[...state.features],kinds:{...state.kinds},separator:state.separator};}
-function runExperiment(){const invalid=$('#config-panel input:invalid');if(invalid){invalid.reportValidity();return;}if(!state.csv||!state.features.length){toast('Load a dataset and select at least one predictor.',true);return;}send('run',state.csv,{config:configSnapshot(),label:state.queueTotal?`Training ${learnerOf(state.config.learner).short} (${state.queueTotal-state.queue.length} of ${state.queueTotal})…`:undefined});}
+function configSnapshot(){return {...state.config,target:state.target,features:[...state.features],kinds:{...state.kinds},separator:state.separator,question_mark_missing:state.qmark!==false};}
+function qmarkGate(){if(!qmarkPending())return false;closeModal();state.view='workspace';state.step='data';render();toast("Confirm how '?' is read before training.");return true;}
+function runExperiment(){if(qmarkGate())return;const invalid=$('#config-panel input:invalid');if(invalid){invalid.reportValidity();return;}if(!state.csv||!state.features.length){toast('Load a dataset and select at least one predictor.',true);return;}send('run',state.csv,{config:configSnapshot(),label:state.queueTotal?`Training ${learnerOf(state.config.learner).short} (${state.queueTotal-state.queue.length} of ${state.queueTotal})…`:undefined});}
 /* Compare all learners: the same data, split and budget, one run per learner, then the Experiments table. */
-function runAll(){if(!state.csv||!state.features.length){toast('Load a dataset and select at least one predictor.',true);return;}if(state.busy){toast('Wait for the current task or cancel it first.');return;}closeModal();state.queue=Object.keys(LEARNERS);state.queueTotal=state.queue.length;state.queueRestore=state.config.learner;nextQueued();}
+function runAll(){if(qmarkGate())return;if(!state.csv||!state.features.length){toast('Load a dataset and select at least one predictor.',true);return;}if(state.busy){toast('Wait for the current task or cancel it first.');return;}closeModal();state.queue=Object.keys(LEARNERS);state.queueTotal=state.queue.length;state.queueRestore=state.config.learner;nextQueued();}
 function nextQueued(){state.config.learner=state.queue.shift();runExperiment();}
 function clearQueue(){if(state.queueRestore)state.config.learner=state.queueRestore;state.queue=[];state.queueTotal=0;state.queueRestore=null;}
 function panelHeader(title,subtitle,glyph='database',right=''){return `<div class="panel-head"><div class="panel-title"><span>${icon(glyph)}</span><div><h3>${title}</h3><p>${subtitle}</p></div></div>${right}</div>`;}
@@ -155,7 +172,7 @@ function sampleCards(){return `<div class="or-line">OR EXPLORE A SAMPLE DATASET<
 function dataPanel(){
  if(!state.meta)return `<div class="panel-body import-body">${dropzone()}${sampleCards()}<div class="center"><button class="paste-action" data-action="paste">Or paste tabular data</button></div></div>`;
  const m=state.meta,num=m.columns.filter(c=>state.kinds[c.name]==='numeric').length;
- return `<div class="panel-body"><div class="dataset-summary"><span>${icon('database')}</span><div><strong>${esc(state.fileName)}</strong><small>${m.rows.toLocaleString()} rows · ${m.columns.length} columns</small></div><button class="button subtle small" data-action="datasets">Replace</button></div><div class="stats-row"><div class="stat-box"><small>NUMERIC</small><strong>${num}</strong><span class="unit">columns</span></div><div class="stat-box"><small>CATEGORICAL</small><strong>${m.columns.length-num}</strong><span class="unit">columns</span></div><div class="stat-box"><small>MISSING VALUES</small><strong>${m.missing}</strong><span class="unit">cells</span></div></div><p class="section-description">Choose the target on the right. Tick the predictors to include and correct a detected type if needed.</p><div class="table-wrap"><table><thead><tr><th>USE</th><th>COLUMN</th><th>TYPE</th><th>UNIQUE</th><th>MISSING</th></tr></thead><tbody>${m.columns.map(c=>`<tr><td>${c.name===state.target?'<span class="pill">TARGET</span>':`<input type="checkbox" aria-label="Use ${esc(c.name)} as predictor" data-feature="${esc(c.name)}" ${state.features.includes(c.name)?'checked':''} ${state.busy?'disabled':''}>`}</td><td title="${esc(c.examples.join(', '))}">${esc(c.name)}</td><td><select aria-label="Type of ${esc(c.name)}" data-kind="${esc(c.name)}" ${state.busy?'disabled':''}><option value="numeric" ${state.kinds[c.name]==='numeric'?'selected':''}>Numeric</option><option value="categorical" ${state.kinds[c.name]==='categorical'?'selected':''}>Categorical</option></select></td><td>${c.unique}</td><td>${c.missing?'<span class="missing-cell">'+c.missing+'</span>':'—'}</td></tr>`).join('')}</tbody></table></div><div class="table-caption"><span>DATA PREVIEW</span><span>First ${m.preview.length} rows</span></div><div class="table-wrap"><table><thead><tr>${m.columns.map(c=>`<th>${esc(c.name)}</th>`).join('')}</tr></thead><tbody>${m.preview.map(row=>`<tr>${m.columns.map(c=>`<td title="${esc(row[c.name])}">${esc(row[c.name]??'—')}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+ return `<div class="panel-body"><div class="dataset-summary"><span>${icon('database')}</span><div><strong>${esc(state.fileName)}</strong><small>${m.rows.toLocaleString()} rows · ${m.columns.length} columns</small></div><button class="button subtle small" data-action="datasets">Replace</button></div>${qmarkNote()}<div class="stats-row"><div class="stat-box"><small>NUMERIC</small><strong>${num}</strong><span class="unit">columns</span></div><div class="stat-box"><small>CATEGORICAL</small><strong>${m.columns.length-num}</strong><span class="unit">columns</span></div><div class="stat-box"><small>MISSING VALUES</small><strong>${m.missing}</strong><span class="unit">cells</span></div></div><p class="section-description">Choose the target on the right. Tick the predictors to include and correct a detected type if needed.</p><div class="table-wrap"><table><thead><tr><th>USE</th><th>COLUMN</th><th>TYPE</th><th>UNIQUE</th><th>MISSING</th></tr></thead><tbody>${m.columns.map(c=>`<tr><td>${c.name===state.target?'<span class="pill">TARGET</span>':`<input type="checkbox" aria-label="Use ${esc(c.name)} as predictor" data-feature="${esc(c.name)}" ${state.features.includes(c.name)?'checked':''} ${state.busy?'disabled':''}>`}</td><td title="${esc(c.examples.join(', '))}">${esc(c.name)}</td><td><select aria-label="Type of ${esc(c.name)}" data-kind="${esc(c.name)}" ${state.busy?'disabled':''}><option value="numeric" ${state.kinds[c.name]==='numeric'?'selected':''}>Numeric</option><option value="categorical" ${state.kinds[c.name]==='categorical'?'selected':''}>Categorical</option></select></td><td>${c.unique}</td><td>${c.missing?'<span class="missing-cell">'+c.missing+'</span>':'—'}</td></tr>`).join('')}</tbody></table></div><div class="table-caption"><span>DATA PREVIEW</span><span>First ${m.preview.length} rows</span></div><div class="table-wrap"><table><thead><tr>${m.columns.map(c=>`<th>${esc(c.name)}</th>`).join('')}</tr></thead><tbody>${m.preview.map(row=>`<tr>${m.columns.map(c=>`<td title="${esc(row[c.name])}">${esc(row[c.name]??'—')}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`;
 }
 function preparePanel(){
  if(!state.meta)return emptyData('Import a dataset first.');
@@ -187,14 +204,35 @@ function ruleList(r){
  return list.map(rule=>`<article class="rule-card"><div class="rule-line"><span class="rule-number">${String(rule.id).padStart(2,'0')}</span><span class="rule-key">IF</span>${rule.conditions.map((c,i)=>`${i?'<span class="rule-key">AND</span>':''}<span>${esc(c.feature)} is <span class="term">${esc(c.term)}</span></span>`).join('')}<span class="rule-key">THEN</span><span class="term consequent">${esc(rule.consequent)}</span></div><div class="rule-meta"><span><strong>${percent(rule.confidence)}</strong> confidence</span><span><strong>${percent(rule.support)}</strong> class support</span><span><strong>${rule.weight==null?'—':rule.weight.toFixed(3)}</strong> weight</span></div></article>`).join('');
 }
 const colors=['#0072b2','#e69f00','#009e73','#cc79a7','#d55e00']; /* same palette as the explorer */
+/* Where neighbouring terms cross, read off the same sampled curves the charts draw (the explorer uses it too).
+   Terms that only meet at membership 0 (a gap) have no crossing. */
+function crossings(v){
+ const out=[];
+ for(let i=0;i+1<v.terms.length;i++){const a=v.terms[i].y,b=v.terms[i+1].y;
+  for(let j=0;j+1<v.x.length;j++){const d0=a[j]-b[j],d1=a[j+1]-b[j+1];
+   if(d0>0&&d1<=0){const f=d0/(d0-d1),y=a[j]+f*(a[j+1]-a[j]);if(y>1e-6)out.push({i,x:v.x[j]+f*(v.x[j+1]-v.x[j]),y});break;}}}
+ return out;
+}
 function chart(v){
- const lo=v.x[0],hi=v.x.at(-1),W=460,H=126,L=28,R=445,T=12,B=105;
+ const lo=v.x[0],hi=v.x.at(-1),W=460,H=126,L=28,R=445,T=12,B=105,X=x=>L+(x-lo)/((hi-lo)||1)*(R-L),fmt=x=>String(Number(x.toPrecision(4)));
  const lines=[0,.5,1].map(y=>`<line x1="${L}" x2="${R}" y1="${B-y*(B-T)}" y2="${B-y*(B-T)}" stroke="#e9eedf" stroke-dasharray="3 4"/><text x="6" y="${B-y*(B-T)+3}">${y}</text>`).join('');
- return `<svg viewBox="0 0 ${W} ${H}" class="numeric-chart" role="img" aria-label="Fitted membership functions for ${esc(v.name)}">${lines}${v.terms.map((t,i)=>{const pts=t.y.map((y,j)=>`${L+j/(v.x.length-1)*(R-L)},${B-y*(B-T)}`).join(' ');return `<polygon points="${L},${B} ${pts} ${R},${B}" fill="${colors[i%colors.length]}" opacity=".06"/><polyline points="${pts}" fill="none" stroke="${colors[i%colors.length]}" stroke-width="2"/>`;}).join('')}<text x="${L}" y="122">${Number(lo.toPrecision(4))}</text><text x="${R}" y="122" text-anchor="end">${Number(hi.toPrecision(4))}</text></svg>`;
+ // Crossing values are placed first; a label that would overlap one already placed is left out.
+ const cuts=crossings(v),placed=[];
+ const label=(x,anchor,s,cls='')=>{const w=s.length*6+6,x0=anchor==='start'?x:anchor==='end'?x-w:x-w/2;if(placed.some(([a,b])=>x0<b&&x0+w>a))return '';placed.push([x0,x0+w]);return `<text x="${x.toFixed(1)}" y="122" text-anchor="${anchor}"${cls?` class="${cls}"`:''}>${s}</text>`;};
+ const marks=cuts.map(c=>`<line class="cut" x1="${X(c.x).toFixed(1)}" x2="${X(c.x).toFixed(1)}" y1="${(B-c.y*(B-T)).toFixed(1)}" y2="${B}"/>`).join('');
+ const axis=cuts.map(c=>label(X(c.x),'middle',fmt(c.x),'cut-label')).join('')+label(L,'start',fmt(lo))+label(R,'end',fmt(hi));
+ return `<svg viewBox="0 0 ${W} ${H}" class="numeric-chart" role="img" aria-label="Fitted membership functions for ${esc(v.name)}${cuts.length?`. Neighbouring terms cross at ${cuts.map(c=>fmt(c.x)).join(' and ')}`:''}">${lines}${marks}${v.terms.map((t,i)=>{const pts=t.y.map((y,j)=>`${L+j/(v.x.length-1)*(R-L)},${B-y*(B-T)}`).join(' ');return `<polygon points="${L},${B} ${pts} ${R},${B}" fill="${colors[i%colors.length]}" opacity=".06"/><polyline points="${pts}" fill="none" stroke="${colors[i%colors.length]}" stroke-width="2"/>`;}).join('')}${axis}</svg>`;
 }
 function partitionResults(r){return `<p class="section-description">Actual partitions fitted on training rows. Numeric terms use trapezoidal membership functions. Categories retain crisp equality memberships.</p>${r.variables.map(v=>`<div class="partition-card"><span class="pill">${v.kind==='numeric'?'NUMERIC':'CATEGORICAL'}</span><h4>${esc(v.name)}</h4>${v.kind==='numeric'?`${chart(v)}<div class="legend-row">${v.terms.map((t,i)=>`<span><i style="background:${colors[i%colors.length]}"></i>${esc(t.name)}</span>`).join('')}</div>`:`<div class="category-chips">${v.terms.map(t=>`<span>${esc(t.name)}</span>`).join('')}</div><p class="form-hint">Membership is 1 for a matching category and 0 otherwise.</p>`}</div>`).join('')}`;}
-function predictionResults(r){return `<div class="rule-filter"><select id="prediction-filter" aria-label="Filter predictions"><option value="all" ${state.predictionFilter==='all'?'selected':''}>All test rows</option><option value="errors" ${state.predictionFilter==='errors'?'selected':''}>Errors only</option><option value="fallback" ${state.predictionFilter==='fallback'?'selected':''}>Majority fallback</option></select><button class="button subtle small" data-action="download-predictions">${icon('download')}Predictions.csv</button></div><p class="section-description">Row numbers refer to the original CSV, including its header. Fallback means no rule fired and the training majority class was used.</p><div id="prediction-list">${predictionTable(r)}</div>`;}
-function predictionTable(r){const rows=r.predictions.filter(p=>state.predictionFilter==='all'||state.predictionFilter==='errors'&&!p.correct||state.predictionFilter==='fallback'&&p.fallback);return `<div class="table-caption"><span>${rows.length} MATCHING TEST ROWS</span><span>Showing up to 150</span></div><div class="table-wrap"><table><thead><tr><th>CSV ROW</th><th>ACTUAL</th><th>PREDICTED</th><th>RESULT</th><th>FALLBACK</th></tr></thead><tbody>${rows.slice(0,150).map(p=>`<tr><td title="${esc(Object.entries(p.values).map(([k,v])=>k+': '+v).join(' · '))}">${p.row}</td><td>${esc(p.actual)}</td><td>${esc(p.predicted)}</td><td><span class="${p.correct?'status-correct':'status-error'}">${p.correct?'Correct':'Error'}</span></td><td>${p.fallback?'Yes':'—'}</td></tr>`).join('')||'<tr><td colspan="5">No rows match this filter.</td></tr>'}</tbody></table></div>`;}
+function predictionResults(r){return `<div class="rule-filter"><select id="prediction-filter" aria-label="Filter predictions"><option value="all" ${state.predictionFilter==='all'?'selected':''}>All test rows</option><option value="errors" ${state.predictionFilter==='errors'?'selected':''}>Errors only</option><option value="fallback" ${state.predictionFilter==='fallback'?'selected':''}>Majority fallback</option></select><button class="button subtle small" data-action="download-predictions">${icon('download')}Predictions.csv</button></div><p class="section-description">Row numbers refer to the original CSV, including its header. Rule is the strongest rule for the predicted class on that row, and firing is how well the row matches it, from 0 to 1. When no rule fires, the training majority class is used.</p><div id="prediction-list">${predictionTable(r)}</div>`;}
+function predictionTable(r){const rows=r.predictions.filter(p=>state.predictionFilter==='all'||state.predictionFilter==='errors'&&!p.correct||state.predictionFilter==='fallback'&&p.fallback);return `<div class="table-caption"><span>${rows.length} MATCHING TEST ROWS</span><span>Showing up to 150</span></div><div class="table-wrap"><table><thead><tr><th>CSV ROW</th><th>ACTUAL</th><th>PREDICTED</th><th>RESULT</th><th>RULE</th><th>FIRING</th></tr></thead><tbody>${rows.slice(0,150).map(p=>`<tr><td title="${esc(Object.entries(p.values).map(([k,v])=>k+': '+v).join(' · '))}">${p.row}</td><td>${esc(p.actual)}</td><td>${esc(p.predicted)}</td><td><span class="${p.correct?'status-correct':'status-error'}">${p.correct?'Correct':'Error'}</span></td>${ruleCell(r,p)}</tr>`).join('')||'<tr><td colspan="6">No rows match this filter.</td></tr>'}</tbody></table></div>`;}
+/* Runs saved before the engine reported the strongest rule have no p.rule; their rule cells stay empty. */
+function ruleCell(r,p){
+ const rule=p.rule!=null&&r.rules.find(x=>x.id===p.rule);
+ if(!rule)return p.fallback?'<td class="rule-cell muted">None · majority class</td><td>—</td>':'<td>—</td><td>—</td>';
+ const when=rule.conditions.map(c=>`${c.feature} is ${c.term}`).join(' and ');
+ return `<td class="rule-cell" title="${esc(`Rule ${rule.id}: IF ${when} THEN ${rule.consequent} · ${percent(rule.confidence)} confidence`)}"><span class="rule-number">${String(rule.id).padStart(2,'0')}</span>${esc(when)}</td><td>${p.firing.toFixed(2)}</td>`;
+}
 /* Settings follow the step: data and prepare show the target and the split; model and results show the learner and its budget. */
 function configPanel(){
  const c=state.config,m=state.meta,dis=state.busy?'disabled':'';
@@ -202,7 +240,7 @@ function configPanel(){
  const split=`<div class="form-field"><label class="config-label" for="test_size">Train / test split <span class="field-value">${Math.round((1-c.test_size)*100)} / ${Math.round(c.test_size*100)}</span></label><input type="range" id="test_size" data-config="test_size" min=".15" max=".4" step=".05" value="${c.test_size}" ${dis}><div class="range-legend"><span>More training</span><span>More testing</span></div></div><div class="form-field"><label class="config-label" for="seed">Random seed</label><input type="number" id="seed" data-config="seed" min="0" max="2147483646" value="${c.seed}" ${dis}><p class="form-hint">Fixes the stratified split and the search.</p></div>`;
  const learnerL=learnerOf(c.learner),ferl=learnerL.cls==='FERL';
  const model=`<button type="button" class="model-label" data-action="learner" ${dis} aria-label="Choose the fuzzy model">${icon('curves')}<div><strong>${esc(learnerL.label)}</strong><small>Fuzzy model · change</small></div><span class="model-chevron">›</span></button><div class="form-split"><div class="form-field"><label class="config-label" for="n_rules">Rule budget</label><input type="number" id="n_rules" data-config="n_rules" min="2" max="40" value="${c.n_rules}" ${dis}></div><div class="form-field"><label class="config-label" for="n_terms">Numeric terms</label><select id="n_terms" data-config="n_terms" ${dis}>${[2,3,4,5].map(v=>`<option ${v===c.n_terms?'selected':''}>${v}</option>`).join('')}</select></div></div>${ferl?'':`<div class="form-field"><label class="config-label" for="n_gen">Generations</label><input type="number" id="n_gen" data-config="n_gen" min="1" max="200" value="${c.n_gen}" ${dis}><p class="form-hint">Search budget; stops early when it stops improving.</p></div>`}<button class="button subtle small config-link" data-action="advanced">${icon('sliders')}Advanced settings</button>`;
- const run=`<div class="config-button"><button class="button primary full" data-action="run" ${!state.csv||!state.features.length||state.busy?'disabled':''}>${state.busy?'<span class="spinner"></span>Working…':icon('play')+(state.runs.length?'Run again':'Run experiment')}</button><p class="form-hint" id="run-hint">${runHintText()}</p></div>`;
+ const run=`<div class="config-button"><button class="button primary full" data-action="run" ${!state.csv||!state.features.length||state.busy||qmarkPending()?'disabled':''}>${state.busy?'<span class="spinner"></span>Working…':icon('play')+(state.runs.length?'Run again':'Run experiment')}</button><p class="form-hint" id="run-hint">${runHintText()}</p></div>`;
  const early=state.step==='data'||state.step==='prepare';
  return `<div class="panel-head"><h3>${early?'Data settings':'Model settings'}</h3></div><div class="config-body">${early?target+split+`<div class="config-button"><button class="button primary full" data-step="${state.step==='data'?'prepare':'model'}">${state.step==='data'?'Continue to prepare':'Continue to model'} ${icon('arrow')}</button></div>`:model+run}</div>`;
 }
@@ -237,12 +275,12 @@ function render(){
 function datasetsModal(){modal(`<div class="eyebrow">BRING YOUR QUESTION</div><h2 class="modal-title">Choose your dataset.</h2><p class="modal-description">Use your own CSV, paste a table, or start with an example. Data stays in this tab.</p><button class="dataset-choice" data-action="choose-file">${icon('upload')}<div><strong>Upload your CSV</strong><p>Numeric and categorical data · up to 5,000 rows · 2 MB</p></div></button><button class="dataset-choice" data-sample="iris">${icon('leaf')}<div><strong>Iris flowers</strong><p>150 flowers, four measurements, three species · scikit-learn Iris</p></div></button><button class="dataset-choice" data-sample="materials">${icon('flask')}<div><strong>Material screening</strong><p>240 synthetic samples · numeric measurements + categorical process</p></div></button><div class="data-controls"><label class="form-hint" for="separator">CSV delimiter</label><select id="separator"><option value="auto" ${state.separator==='auto'?'selected':''}>Detect automatically</option><option value="," ${state.separator===','?'selected':''}>Comma</option><option value=";" ${state.separator===';'?'selected':''}>Semicolon</option><option value="\t" ${state.separator==='\t'?'selected':''}>Tab</option></select><button class="paste-action" data-action="paste">Paste data instead</button></div>`);}
 function advancedModal(){const c=state.config;modal(`<div class="eyebrow">A LITTLE MORE CONTROL</div><h2 class="modal-title">Search settings.</h2><p class="modal-description">More conditions allow richer rules, but increase the candidate search. Start small and compare.</p><div class="form-split"><div class="form-field"><label class="config-label" for="adv-ants">Max conditions per rule</label><select id="adv-ants">${[1,2,3].map(n=>`<option ${c.n_ants===n?'selected':''}>${n}</option>`).join('')}</select></div><div class="form-field"><label class="config-label" for="adv-pop">Population size</label><input type="number" id="adv-pop" min="4" max="100" value="${c.pop_size}"></div></div><div class="note">The browser workspace supports up to 12 predictors and 24 training categories per categorical predictor. The learner is exFuzzy's FuzzyRulesClassifier with fixed fuzzy partitions and additive weighted rule voting.</div><div class="modal-actions"><button class="button outline" data-action="close-modal">Cancel</button><button class="button primary" data-action="save-advanced" ${state.busy?'disabled':''}>Apply settings</button></div>`);}
 function learnerModal(){const speed=n=>`<span class="speed" aria-hidden="true">${[1,2,3].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('')}</span>${SPEED[n]}`;modal(`<h2 class="modal-title">Choose a learner.</h2><p class="modal-description">All learners share the same fuzzy partitions, split and evaluation, so runs stay comparable. Rule budget and conditions per rule apply to every learner.</p><div class="learner-list" role="group" aria-label="Learners">${Object.entries(LEARNERS).map(([key,L])=>`<button type="button" class="learner-choice${key===state.config.learner?' selected':''}" data-action="pick-learner" data-learner="${key}" aria-pressed="${key===state.config.learner}"><span class="learner-check" aria-hidden="true">${key===state.config.learner?icon('check'):''}</span><span class="learner-text"><span class="learner-head"><strong>${esc(L.label)}</strong>${L.recommended?'<span class="learner-tag">Recommended</span>':''}</span><p class="when">${esc(L.when)}</p><span class="learner-meta"><span>${speed(L.speed)}</span><span>${esc(L.cls)}${L.cls.startsWith('Rule')?' · PyMoo':''}</span></span></span></button>`).join('')}</div><div class="modal-foot"><p>Not sure? Run every learner on this split and pick from the results table.</p><button type="button" class="button outline" data-action="run-all" ${!state.csv||!state.features.length||state.busy?'disabled':''}>${icon('flask')}Compare all learners</button></div>`);}
-function runHintText(){return state.ready?'Python engine ready · runs locally in this browser':state.bootMessage?'Preparing the Python engine: '+state.bootMessage.replace(/…$/,'')+'. Run will start when it is ready.':'The Python engine starts on first use.';}
+function runHintText(){return qmarkPending()?"Confirm how '?' is read in the Data step first.":state.ready?'Python engine ready · runs locally in this browser':state.bootMessage?'Preparing the Python engine: '+state.bootMessage.replace(/…$/,'')+'. Run will start when it is ready.':'The Python engine starts on first use.';}
 function runHint(){const el=$('#run-hint');if(el)el.textContent=runHintText();}
 setInterval(()=>{if(!state.busy||state.ready||!state.bootStageAt)return;const s=Math.round((Date.now()-state.bootStageAt)/1000);if(s>=25&&s%5===0)setProgress(state.bootMessage.replace(/…$/,'')+` · still working after ${s}s. Files come from this site's /pyodide/ folder; check the browser's network panel if this never finishes.`);},1000);
 function cancelTask(){clearQueue();state.worker?.terminate();state.worker=null;state.ready=false;state.warming=false;finishBusy();toast('Task stopped. Your data and completed experiments are still in this tab.');}
 function csvEscape(v){return '"'+String(v??'').replaceAll('"','""')+'"';}
-function predictionCSV(r){const fs=r.config.features;return ['csv_row,actual,predicted,correct,majority_fallback,'+fs.map(csvEscape).join(','),...r.predictions.map(p=>[p.row,p.actual,p.predicted,p.correct,p.fallback,...fs.map(f=>p.values[f])].map(csvEscape).join(','))].join('\r\n');}
+function predictionCSV(r){const fs=r.config.features;return ['csv_row,actual,predicted,correct,majority_fallback,rule_id,rule_firing,'+fs.map(csvEscape).join(','),...r.predictions.map(p=>[p.row,p.actual,p.predicted,p.correct,p.fallback,p.rule,p.firing,...fs.map(f=>p.values[f])].map(csvEscape).join(','))].join('\r\n');}
 function download(name,content,type='text/plain'){const blob=content instanceof Blob?content:new Blob([content],{type});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);}
 // Small, uncompressed ZIP writer. All files remain on the user's device.
 function zipFiles(files){
@@ -288,6 +326,7 @@ document.addEventListener('click',e=>{
  else if(action==='export')saveModelModal();
  else if(action==='export-download')exportBundle();
  else if(action==='run-all')runAll();
+ else if(action==='qmark-missing'||action==='qmark-text')setQmark(action==='qmark-missing');
  else if(action==='explore'){if(currentRun())openExplorer({kind:'run',index:state.activeRun});}
  else if(action==='explore-example')openExplorer({kind:'fixture',name:'materials'});
  else if(action==='cancel')cancelTask();

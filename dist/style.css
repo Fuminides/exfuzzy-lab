@@ -131,6 +131,7 @@ h2{font:700 19px/1.3 var(--display);letter-spacing:-.02em}
 .section-description{font-size:14px;line-height:1.65;color:var(--muted);margin-bottom:18px;max-width:72ch}
 .note{font-size:13.5px;line-height:1.6;color:var(--muted);background:var(--surface-2);border-radius:var(--r-md);padding:12px 16px;margin-top:16px}
 .note.warning{color:var(--warn);background:var(--warn-bg)}
+.qmark-note{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 16px}.qmark-note strong{color:var(--text)}.qmark-actions{display:flex;gap:8px;flex-shrink:0}
 .note svg{width:14px;height:14px;vertical-align:-2px;margin-right:4px}
 .setup-banner{padding:16px 18px;border-radius:var(--r-md);background:var(--accent-tint);border:1px solid var(--accent-soft);font-size:14px;line-height:1.6;color:var(--text);margin-bottom:20px}
 .setup-banner strong{color:var(--accent)}
@@ -219,6 +220,7 @@ button.model-label:hover:enabled{border-color:var(--accent);background:var(--acc
 table{width:100%;border-collapse:collapse;text-align:left;font-size:14px}
 th{font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:var(--surface-2);color:var(--muted);padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
 td{padding:11px 14px;border-bottom:1px solid var(--line);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);font-variant-numeric:tabular-nums}
+td.rule-cell{width:100%;max-width:0}td.rule-cell .rule-number{display:inline-block;margin-right:8px}td.muted{color:var(--faint)}
 tbody tr:last-child td{border-bottom:0}
 .table-wrap select{max-width:140px;min-height:34px;padding:5px 8px;font-size:13px}
 .table-wrap input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
@@ -299,6 +301,7 @@ tbody tr:last-child td{border-bottom:0}
 .partition-card .pill{float:right}
 .partition-card svg{width:100%;height:150px;display:block;margin:10px 0}
 .numeric-chart text{font-family:var(--body);font-size:11px;fill:var(--muted)}
+.numeric-chart .cut{stroke:var(--faint);stroke-dasharray:2 3}.numeric-chart .cut-label{fill:var(--text);font-weight:600}
 .category-chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
 .category-chips span{padding:6px 11px;border:1px solid var(--line);border-radius:var(--r-pill);font-size:13px;color:var(--text);background:var(--surface-2)}
 

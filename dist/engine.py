@@ -27,6 +27,7 @@ from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, c
 
 import ex_fuzzy
 from ex_fuzzy import FuzzyRulesClassifier, FERL, RuleMineClassifier, RuleFineTuneClassifier, fuzzy_sets as fs, persistence, utils
+from ex_fuzzy import _fuzzy_association as association
 
 try:
     import pymoo
@@ -84,7 +85,7 @@ def _ferl_rules(model, features, partitions, y_train):
             coverage = float(child["coverage"])
             support = coverage * n * conf / max(class_count.get(consequent, 0), 1)
             rules.append(dict(conditions=[dict(feature=features[f], term=str(partitions[f][t].name)) for f, t in step],
-                              consequent=consequent, confidence=conf, support=support, weight=None, depth=len(step)))
+                              consequent=consequent, confidence=conf, support=support, weight=None, depth=len(step), path=tuple(step)))
             walk(child, step)
 
     walk(model._root, [])
@@ -93,12 +94,29 @@ def _ferl_rules(model, features, partitions, y_train):
         r.pop("depth")
         r["id"] = i + 1
     return [dict(id=r["id"], conditions=r["conditions"], consequent=r["consequent"], confidence=r["confidence"],
-                 support=r["support"], weight=r["weight"]) for r in rules]
+                 support=r["support"], weight=r["weight"]) for r in rules], [r["path"] for r in rules]
 
 
-def read_frame(csv_text, separator="auto"):
+def _strongest_rules(contribution, firing, rule_classes, predicted):
+    """Per test row, the rule for the predicted class that adds most to that class's score, as (rule id, firing degree).
+
+    contribution and firing are (rows, rules) with columns in rule-id order. With strongest-rule inference this is
+    the rule that decided the row; with additive or soft voting, other rules for the class add to its score.
+    Rows where no rule for the predicted class fires (majority fallback) get (None, None)."""
+    rule_classes = np.asarray(rule_classes, str)
+    out = []
+    for i, p in enumerate(predicted):
+        c = np.where(rule_classes == p, contribution[i], 0.0)
+        k = int(np.argmax(c)) if c.size else -1
+        out.append((k + 1, float(firing[i, k])) if k >= 0 and c[k] > 1e-12 else (None, None))
+    return out
+
+
+def read_frame(csv_text, separator="auto", question_mark_missing=True):
     sep = None if separator == "auto" else separator
-    frame = pd.read_csv(io.StringIO(csv_text), sep=sep, engine="python" if sep is None else "c", keep_default_na=True)
+    # "?" marks missing values in UCI datasets; the app asks the user to confirm that reading.
+    frame = pd.read_csv(io.StringIO(csv_text), sep=sep, engine="python" if sep is None else "c", keep_default_na=True,
+                        na_values=["?"] if question_mark_missing else None)
     frame.columns = [str(c).strip() for c in frame.columns]
     if len(set(frame.columns)) != len(frame.columns):
         raise ValueError("Column names must be unique after trimming whitespace.")
@@ -107,8 +125,8 @@ def read_frame(csv_text, separator="auto"):
     return frame.replace([np.inf, -np.inf], np.nan)
 
 
-def inspect_dataset(csv_text, separator="auto"):
-    frame = read_frame(csv_text, separator)
+def inspect_dataset(csv_text, separator="auto", question_mark_missing=True):
+    frame = read_frame(csv_text, separator, question_mark_missing)
     if not 10 <= len(frame) <= 5000:
         raise ValueError("This browser workspace supports 10 to 5,000 rows per dataset.")
     mask = utils.detect_categorical_mask(frame)
@@ -130,7 +148,8 @@ def run_experiment(csv_text, config):
     if ex_fuzzy.__version__ != VERSION:
         raise ValueError("This experiment requires ex-fuzzy==3.3.0.")
     started = time.perf_counter()
-    frame = read_frame(csv_text, config.get("separator", "auto"))
+    question_mark_missing = bool(config.get("question_mark_missing", True))
+    frame = read_frame(csv_text, config.get("separator", "auto"), question_mark_missing)
     if not 10 <= len(frame) <= 5000:
         raise ValueError("Use a dataset with 10 to 5,000 rows.")
     target = config["target"]
@@ -194,8 +213,9 @@ def run_experiment(csv_text, config):
             preprocessing.append(dict(name=name, kind=kind, categories=categories, unseen_test=unseen))
         elif kind == "numeric":
             a_num, b_num = pd.to_numeric(a, errors="coerce"), pd.to_numeric(b, errors="coerce")
-            if (a.notna() & a_num.isna()).any() or (b.notna() & b_num.isna()).any():
-                raise ValueError(f"'{name}' contains non-numeric values. Change its type to categorical.")
+            bad = pd.concat([a[a.notna() & a_num.isna()], b[b.notna() & b_num.isna()]])
+            if len(bad):
+                raise ValueError(f"'{name}' contains non-numeric values such as '{bad.iloc[0]}'. Change its type to categorical.")
             median = float(a_num.median())
             if not np.isfinite(median):
                 raise ValueError(f"'{name}' has no valid numeric training values. Exclude it or change its type.")
@@ -261,9 +281,19 @@ def run_experiment(csv_text, config):
         train_pred[train_no_match] = majority; test_pred[no_match] = majority
         train_pred = train_pred.astype(str); test_pred = test_pred.astype(str)
         rules_text = master.print_rules(return_rules=True)
+        strongest = _strongest_rules(np.asarray(master.compute_association_degrees(test_df.to_numpy(), firing_strengths=fire_test), float),
+                                     fire_test, [r["consequent"] for r in rules_out], test_pred)
     elif learner["cls"] == "FERL":
-        rules_out = _ferl_rules(model, features, partitions, y[train_i])
+        rules_out, paths = _ferl_rules(model, features, partitions, y[train_i])
         no_match = np.asarray(model.firing_strength(test_df), float) <= 1e-12
+        node_firing, node_probs, _ = model.node_activation_matrix(test_df)
+        nodes = [nd for nd in model._cached_all_nodes if nd["path_length"] > 0]
+        column = {tuple((int(f), int(t)) for f, t in zip(nd["path_features"], nd["path_fuzzy_sets"])): k for k, nd in enumerate(nodes)}
+        order = [column[tuple((int(f), int(t)) for f, t in p)] for p in paths]
+        node_firing, node_probs = node_firing[:, order], node_probs[order]
+        class_ix = {str(c): j for j, c in enumerate(model.classes_)}
+        votes = node_firing * node_probs[:, [class_ix[p] for p in test_pred]].T
+        strongest = _strongest_rules(votes, node_firing, [r["consequent"] for r in rules_out], test_pred)
         tree_text = io.StringIO()
         with contextlib.redirect_stdout(tree_text):
             model.print_tree()
@@ -280,10 +310,14 @@ def run_experiment(csv_text, config):
         scores = np.asarray(model._scores(test_df), float)
         no_match = np.all(scores == 0, axis=1)
         rules_text = model.print_rules(return_rules=True)
+        memberships = association.membership_matrices(model.linguistic_variables_, test_df.to_numpy()[:, model.selected_features_])
+        firing = association.rule_firing(memberships, pool["features"], pool["terms"], len(test_i)).T
+        strongest = _strongest_rules(firing * np.asarray(pool["weight"], float), firing, [r["consequent"] for r in rules_out], test_pred)
     predictions = []
     for i, row_i in enumerate(test_i):
         predictions.append(dict(row=int(frame.index[row_i]) + 2, actual=str(y[row_i]), predicted=str(test_pred[i]),
                                 correct=bool(y[row_i] == test_pred[i]), fallback=bool(no_match[i]),
+                                rule=strongest[i][0], firing=strongest[i][1],
                                 values={f: None if pd.isna(raw.iloc[row_i][f]) else str(raw.iloc[row_i][f]) for f in features}))
     if no_match.any():
         notes.append(f"{int(no_match.sum())} test rows fired no rule and used the training majority class"
@@ -293,7 +327,7 @@ def run_experiment(csv_text, config):
     # The trained model and its preprocessing, reloadable with load_model.py from the saved bundle.
     saved = dict(format="exfuzzy-lab-model/1", exfuzzy=VERSION, learner=learner["cls"], learner_key=learner_key,
                  learner_label=learner["label"], target=target, features=features, classes=[str(c) for c in model.classes_],
-                 preprocessing=preprocessing, majority=majority, model=model)
+                 preprocessing=preprocessing, majority=majority, na_values=["?"] if question_mark_missing else [], model=model)
     model_b64 = base64.b64encode(pickle.dumps(saved, protocol=4)).decode("ascii")
     return dict(version=VERSION, learner=learner["cls"], learner_key=learner_key, learner_label=learner["label"], config=config,
                 dataset_sha256=hashlib.sha256(csv_text.encode("utf-8")).hexdigest(),

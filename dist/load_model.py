@@ -31,6 +31,7 @@ class SavedModel:
         self.classes = list(saved["classes"])
         self.preprocessing = saved["preprocessing"]
         self.majority = saved["majority"]
+        self.na_values = list(saved.get("na_values", []))  # extra missing-value markers, e.g. "?"; [] if none
         self.model = saved["model"]
 
     def prepare(self, frame):
@@ -76,6 +77,15 @@ class SavedModel:
 
 
 def load_model(path="model.pkl"):
+    # ex-fuzzy 3.3.0 builds its pymoo problem class on first use, and models from the genetic learners
+    # refer to it, so it has to exist before unpickling in a new process.
+    from ex_fuzzy import _problem
+    build = getattr(_problem, "_pymoo_problem_class", None)
+    if build is not None:
+        try:
+            build()
+        except ImportError:  # pymoo missing: only genetic-learner models need it
+            pass
     with open(path, "rb") as fh:
         saved = pickle.load(fh)
     if not isinstance(saved, dict) or saved.get("format") != "exfuzzy-lab-model/1":
@@ -88,7 +98,7 @@ if __name__ == "__main__":
         sys.exit("usage: python load_model.py new_rows.csv")
     source = Path(sys.argv[1])
     model = load_model(Path(__file__).with_name("model.pkl"))
-    frame = pd.read_csv(source)
+    frame = pd.read_csv(source, na_values=model.na_values)  # read "?" as the app did
     labels = model.predict(frame)
     out = frame.copy()
     out["predicted_" + model.target] = labels
