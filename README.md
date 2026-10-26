@@ -1,6 +1,7 @@
 # exFuzzy Lab
 
 A visual research workspace, in English, for Type-1 fuzzy classification with **ex-fuzzy 3.3.0**.
+Try it here: [ExFuzzy Lab](https://fuminides.github.io/exfuzzy-lab/)
 
 ## Run
 
